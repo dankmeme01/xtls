@@ -35,6 +35,9 @@ public:
     /// Receives data from this socket, returning the number of bytes received.
     TlsResult<size_t> receive(void* buf, size_t size);
 
+    /// Shuts down the stream for reading, writing, or both.
+    TlsResult<> shutdown(qsox::ShutdownMode mode);
+
     qsox::NetResult<qsox::SocketAddress> localAddress() const;
     qsox::NetResult<qsox::SocketAddress> remoteAddress() const;
 

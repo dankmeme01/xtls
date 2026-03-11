@@ -42,6 +42,10 @@ TlsResult<size_t> TlsSocket::receive(void* buf, size_t size) {
     });
 }
 
+TlsResult<> TlsSocket::shutdown(qsox::ShutdownMode mode) {
+    return mapResult(m_stream.shutdown(mode));
+}
+
 qsox::NetResult<qsox::SocketAddress> TlsSocket::localAddress() const {
     return m_stream.localAddress();
 }
