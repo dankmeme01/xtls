@@ -33,10 +33,3 @@ private:
 }
 
 #endif // XTLS_ENABLE_ARC_SOCKET
-
-// PollWrite
-// 1. write into tls session, upon want read/write call pollReady and loop, try to read/write data if applicable
-// 2. getEncryptedData, and then try to flush it all to the stream, notify about sent data
-// PollRead
-// 1. read, upon want read/write call pollReady and loop, try to read/write data if applicable
-// 2.
