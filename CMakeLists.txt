@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (NOT CURRENT_CPM_VERSION)
-    include(cmake/CPM.cmake)
+    include(cmake/get_cpm.cmake)
 endif()
 
 project(xtls)
