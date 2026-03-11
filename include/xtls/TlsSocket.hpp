@@ -55,7 +55,7 @@ protected:
             // always try to poll writes
             GEODE_UNWRAP_INTO(auto pair, m_session->getEncryptedData());
             auto [edata, esize] = pair;
-            while (esize > 0) {
+            if (esize > 0) {
                 GEODE_UNWRAP(mapResult(m_stream.sendAll(edata, esize)));
                 GEODE_UNWRAP(m_session->notifyEncryptedSent(static_cast<size_t>(esize)));
             }
