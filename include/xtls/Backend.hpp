@@ -17,6 +17,10 @@ public:
     Backend& operator=(const Backend&) = delete;
 
     virtual TlsResult<std::shared_ptr<Context>> createContext(ContextType type) const;
+
+    /// Returns a global instance of one of the enabled TLS backends.
+    /// If multiple are enabled, the choice is not strictly defined, but this function is guaranteed to always return the same backend.
+    static Backend& get();
 };
 
 }

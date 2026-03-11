@@ -8,7 +8,7 @@ using namespace arc;
 // Resolves www.google.com and makes a HTTP/1.1 HTTPS request using AsyncTlsSocket
 
 Future<xtls::TlsResult<>> asyncMainWr() {
-    auto& backend = xtls::OpenSSLBackend::get();
+    auto& backend = xtls::Backend::get();
     auto context = backend.createContext(xtls::ContextType::Client).unwrap();
     context->setCertVerification(false).unwrap(); // don't do this in production :)
 

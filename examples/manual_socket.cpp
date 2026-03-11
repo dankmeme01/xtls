@@ -7,7 +7,7 @@
 // Tries to connect to a TLS server running on localhost:4433, using plain bsd sockets
 
 int main() {
-    auto& backend = xtls::OpenSSLBackend::get();
+    auto& backend = xtls::Backend::get();
     auto context = backend.createContext(xtls::ContextType::Client).unwrap();
     context->setCertVerification(false).unwrap();
     auto session = context->createSession().unwrap();

@@ -1,6 +1,7 @@
 #include <xtls/impl/openssl.hpp>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include "../Util.hpp"
 
 using namespace geode;
 
@@ -26,18 +27,6 @@ TlsResult<> tlsWrap(auto rcode) {
     } else {
         return Err(lastError());
     }
-}
-
-static std::string pathToString(const std::filesystem::path& path) {
-#ifdef _WIN32
-    auto& wstr = path.native();
-    int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), wstr.length(), NULL, 0, NULL, NULL);
-    std::string str(count, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
-    return str;
-#else
-    return path.string();
-#endif
 }
 
 /// Backend
