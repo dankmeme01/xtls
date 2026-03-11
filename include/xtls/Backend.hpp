@@ -18,6 +18,10 @@ public:
 
     virtual TlsResult<std::shared_ptr<Context>> createContext(ContextType type) const;
 
+    virtual std::string_view name() const = 0;
+    virtual std::string_view version() const = 0;
+    virtual std::string_view description() const = 0;
+
     /// Returns a global instance of one of the enabled TLS backends.
     /// If multiple are enabled, the choice is not strictly defined, but this function is guaranteed to always return the same backend.
     static Backend& get();

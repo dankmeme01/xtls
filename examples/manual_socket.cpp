@@ -8,8 +8,10 @@
 
 int main() {
     auto& backend = xtls::Backend::get();
+    std::println("Using backend {}", backend.description());
+
     auto context = backend.createContext(xtls::ContextType::Client).unwrap();
-    context->setCertVerification(false).unwrap();
+    context->loadSystemCACerts().unwrap();
     auto session = context->createSession().unwrap();
 
     int s = socket(AF_INET, SOCK_STREAM, 0);

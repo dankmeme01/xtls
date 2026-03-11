@@ -9,8 +9,10 @@ using namespace arc;
 
 Future<xtls::TlsResult<>> asyncMainWr() {
     auto& backend = xtls::Backend::get();
+    std::println("Using backend {}", backend.description());
+
     auto context = backend.createContext(xtls::ContextType::Client).unwrap();
-    context->setCertVerification(false).unwrap(); // don't do this in production :)
+    context->loadSystemCACerts().unwrap();
 
     std::println("Resolving www.google.com...");
     auto addrs = co_await arc::spawnBlocking<qsox::IpAddress>([] {

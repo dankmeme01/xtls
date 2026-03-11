@@ -13,6 +13,9 @@ class OpenSSLSession;
 class OpenSSLBackend : public Backend {
 public:
     TlsResult<std::shared_ptr<Context>> createContext(ContextType type) const override;
+    std::string_view name() const override;
+    std::string_view version() const override;
+    std::string_view description() const override;
 
     /// Gets the global instance of the OpenSSL backend
     static OpenSSLBackend& get();
@@ -32,6 +35,7 @@ public:
     TlsResult<> setCertVerification(bool verify) override;
     TlsResult<> loadCACerts(const std::filesystem::path& path) override;
     TlsResult<> loadCACertsBlob(std::string_view pemCerts) override;
+    TlsResult<> loadSystemCACerts() override;
 
 private:
     friend class OpenSSLBackend;

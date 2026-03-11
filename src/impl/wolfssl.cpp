@@ -29,6 +29,19 @@ TlsResult<> tlsWrap(auto rcode) {
 
 /// Backend
 
+std::string_view WolfSSLBackend::name() const {
+    return "wolfSSL";
+}
+
+std::string_view WolfSSLBackend::version() const {
+    return wolfSSL_lib_version();
+}
+
+std::string_view WolfSSLBackend::description() const {
+    static std::string desc = "wolfSSL " + std::string(version());
+    return desc;
+}
+
 WolfSSLBackend::WolfSSLBackend() {}
 
 WolfSSLBackend& WolfSSLBackend::get() {
@@ -119,6 +132,13 @@ TlsResult<> WolfSSLContext::loadCACertsBlob(std::string_view pemCerts) {
         (long)pemCerts.size(),
         WOLFSSL_FILETYPE_PEM
     ));
+}
+
+TlsResult<> WolfSSLContext::loadSystemCACerts() {
+    if (1 != wolfSSL_CTX_set_default_verify_paths(m_ctx)) {
+        return Err(lastError());
+    }
+    return Ok();
 }
 
 /// Session

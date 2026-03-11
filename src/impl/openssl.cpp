@@ -31,6 +31,18 @@ TlsResult<> tlsWrap(auto rcode) {
 
 /// Backend
 
+std::string_view OpenSSLBackend::name() const {
+    return "OpenSSL";
+}
+
+std::string_view OpenSSLBackend::version() const {
+    return OpenSSL_version(OPENSSL_VERSION);
+}
+
+std::string_view OpenSSLBackend::description() const {
+    return version(); // it already includes "OpenSSL" at the start
+}
+
 OpenSSLBackend::OpenSSLBackend() {}
 
 OpenSSLBackend& OpenSSLBackend::get() {
@@ -140,6 +152,13 @@ TlsResult<> OpenSSLContext::loadCACertsBlob(std::string_view pemCerts) {
     }
 
     BIO_free(cbio);
+    return Ok();
+}
+
+TlsResult<> OpenSSLContext::loadSystemCACerts() {
+    if (1 != SSL_CTX_set_default_verify_paths(m_ctx)) {
+        return Err(lastError());
+    }
     return Ok();
 }
 
