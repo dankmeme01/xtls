@@ -16,6 +16,12 @@ public:
 
     /// Sets the hostname for SNI and certificate verification (client only)
     virtual void setHostname(const std::string& hostname) = 0;
+    /// Sets the ALPN protocols to offer (client only)
+    virtual void setALPN(std::span<const uint8_t> protos) = 0;
+    /// Sets a data pointer specific to the application
+    virtual void setAppData(void* data) = 0;
+    /// Gets the application data pointer
+    virtual void* getAppData() const = 0;
 
     /// Performs the TLS handshake. This must be called before any read or write operations.
     virtual TlsResult<> doHandshake() = 0;

@@ -211,6 +211,18 @@ void OpenSSLSession::setHostname(const std::string& hostname) {
     SSL_set1_host(m_ssl, hostname.c_str());
 }
 
+void OpenSSLSession::setALPN(std::span<const uint8_t> protos) {
+    SSL_set_alpn_protos(m_ssl, protos.data(), protos.size());
+}
+
+void OpenSSLSession::setAppData(void* data) {
+    SSL_set_app_data(m_ssl, data);
+}
+
+void* OpenSSLSession::getAppData() const {
+    return SSL_get_app_data(m_ssl);
+}
+
 TlsResult<> OpenSSLSession::doHandshake() {
     int ret = SSL_do_handshake(m_ssl);
     if (ret == 1) {

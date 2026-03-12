@@ -56,6 +56,9 @@ public:
 
     TlsError lastError(int ret) const override;
     void setHostname(const std::string& hostname) override;
+    void setALPN(std::span<const uint8_t> protos) override;
+    void setAppData(void* data) override;
+    void* getAppData() const override;
     TlsResult<> doHandshake() override;
 
     TlsResult<size_t> read(void* buf, size_t size) override;

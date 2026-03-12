@@ -213,6 +213,18 @@ void WolfSSLSession::setHostname(const std::string& hostname) {
     wolfSSL_check_domain_name(m_ssl, hostname.c_str());
 }
 
+void WolfSSLSession::setALPN(std::span<const uint8_t> protos) {
+    wolfSSL_set_alpn_protos(m_ssl, protos.data(), protos.size());
+}
+
+void WolfSSLSession::setAppData(void* data) {
+    wolfSSL_set_app_data(m_ssl, data);
+}
+
+void* WolfSSLSession::getAppData() const {
+    return wolfSSL_get_app_data(m_ssl);
+}
+
 TlsResult<> WolfSSLSession::doHandshake() {
     int ret = wolfSSL_negotiate(m_ssl);
     if (ret == SSL_SUCCESS) {
