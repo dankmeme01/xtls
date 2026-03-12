@@ -12,6 +12,8 @@ public:
     Session(const Session&) = delete;
     Session& operator=(const Session&) = delete;
 
+    virtual void* handle_() const = 0;
+
     /// Sets the hostname for SNI and certificate verification (client only)
     virtual void setHostname(const std::string& hostname) = 0;
 
@@ -29,6 +31,9 @@ public:
     virtual TlsResult<> feedEncryptedData(const uint8_t* data, size_t size) = 0;
     virtual TlsResult<std::pair<const uint8_t*, size_t>> getEncryptedData() = 0;
     virtual TlsResult<> notifyEncryptedSent(size_t bytes) = 0;
+
+    /// Returns the last error that happened in this session
+    virtual TlsError lastError(int ret = 0) const { return TlsError {0}; }
 };
 
 }

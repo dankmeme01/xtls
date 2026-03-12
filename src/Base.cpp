@@ -1,4 +1,5 @@
 #include <xtls/Base.hpp>
+#include <xtls/Backend.hpp>
 
 namespace xtls {
 
@@ -9,5 +10,9 @@ $xerr(WANT_READ, 2, "Operation would block on read");
 $xerr(WANT_WRITE, 3, "Operation would block on write");
 
 #undef $xerr
+
+TlsError TlsError::lastError(int code) {
+    return Backend::get().lastError(code);
+}
 
 }

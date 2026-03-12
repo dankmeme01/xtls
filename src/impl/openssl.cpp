@@ -50,6 +50,10 @@ OpenSSLBackend& OpenSSLBackend::get() {
     return instance;
 }
 
+TlsError OpenSSLBackend::lastError(int code) const {
+    return ::xtls::lastError();
+}
+
 TlsResult<std::shared_ptr<Context>> OpenSSLBackend::createContext(ContextType type) const {
     const SSL_METHOD* meth = nullptr;
     bool server = false;

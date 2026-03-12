@@ -28,6 +28,8 @@ struct TlsError {
         return TlsError{XTLS_CODE_BASE, std::move(message)};
     }
 
+    static TlsError lastError(int code = 0);
+
     bool operator==(const TlsError& other) const {
         return code == other.code;
     }

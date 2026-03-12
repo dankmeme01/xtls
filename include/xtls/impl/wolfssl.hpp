@@ -14,6 +14,7 @@ class WolfSSLSession;
 class WolfSSLBackend : public Backend {
 public:
     TlsResult<std::shared_ptr<Context>> createContext(ContextType type) const override;
+    TlsError lastError(int code = 0) const override;
     std::string_view name() const override;
     std::string_view version() const override;
     std::string_view description() const override;
@@ -31,6 +32,7 @@ public:
     ~WolfSSLContext();
 
     WOLFSSL_CTX* handle() const;
+    void* handle_() const override { return handle(); }
 
     TlsResult<std::shared_ptr<Session>> createSession() override;
     TlsResult<> setCertVerification(bool verify) override;
@@ -50,7 +52,9 @@ public:
     ~WolfSSLSession();
 
     WOLFSSL* handle() const;
+    void* handle_() const override { return handle(); }
 
+    TlsError lastError(int ret) const override;
     void setHostname(const std::string& hostname) override;
     TlsResult<> doHandshake() override;
 
@@ -67,8 +71,6 @@ private:
     WOLFSSL* m_ssl;
     std::vector<uint8_t> m_rbio, m_wbio;
     bool m_server = false;
-
-    TlsError lastError(int ret) const;
 
     static int readcb(WOLFSSL* ssl, char* buf, int size, void* ctx);
     static int writecb(WOLFSSL* ssl, char* buf, int size, void* ctx);

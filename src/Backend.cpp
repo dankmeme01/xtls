@@ -10,6 +10,10 @@ TlsResult<std::shared_ptr<Context>> Backend::createContext(ContextType type) con
     return Err(TlsError::custom("not implemented"));
 }
 
+TlsError Backend::lastError(int code) const {
+    return TlsError{0};
+}
+
 Backend& Backend::get() {
 #ifdef XTLS_ENABLE_OPENSSL
     return OpenSSLBackend::get();

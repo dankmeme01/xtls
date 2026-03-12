@@ -13,6 +13,7 @@ class OpenSSLSession;
 class OpenSSLBackend : public Backend {
 public:
     TlsResult<std::shared_ptr<Context>> createContext(ContextType type) const override;
+    TlsError lastError(int code = 0) const override;
     std::string_view name() const override;
     std::string_view version() const override;
     std::string_view description() const override;
@@ -30,6 +31,7 @@ public:
     ~OpenSSLContext();
 
     SSL_CTX* handle() const;
+    void* handle_() const override { return handle(); }
 
     TlsResult<std::shared_ptr<Session>> createSession() override;
     TlsResult<> setCertVerification(bool verify) override;
@@ -49,7 +51,9 @@ public:
     ~OpenSSLSession();
 
     SSL* handle() const;
+    void* handle_() const override { return handle(); }
 
+    TlsError lastError(int ret) const override;
     void setHostname(const std::string& hostname) override;
     TlsResult<> doHandshake() override;
 
@@ -67,7 +71,6 @@ private:
     BIO* m_wbio;
     bool m_server = false;
 
-    TlsError lastError(int ret) const;
 };
 
 }

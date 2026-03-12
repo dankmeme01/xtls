@@ -15,6 +15,8 @@ public:
     Context(const Context&) = delete;
     Context& operator=(const Context&) = delete;
 
+    virtual void* handle_() const = 0;
+
     virtual TlsResult<std::shared_ptr<Session>> createSession();
 
     virtual TlsResult<> setCertVerification(bool verify);

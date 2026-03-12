@@ -17,6 +17,7 @@ public:
     Backend& operator=(const Backend&) = delete;
 
     virtual TlsResult<std::shared_ptr<Context>> createContext(ContextType type) const;
+    virtual TlsError lastError(int code = 0) const;
 
     virtual std::string_view name() const = 0;
     virtual std::string_view version() const = 0;

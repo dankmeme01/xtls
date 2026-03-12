@@ -49,6 +49,10 @@ WolfSSLBackend& WolfSSLBackend::get() {
     return instance;
 }
 
+TlsError WolfSSLBackend::lastError(int code) const {
+    return ::xtls::lastError();
+}
+
 TlsResult<std::shared_ptr<Context>> WolfSSLBackend::createContext(ContextType type) const {
     WOLFSSL_METHOD* meth = nullptr;
     bool server = false;
