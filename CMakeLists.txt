@@ -21,6 +21,10 @@ file(GLOB SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 add_library(xtls STATIC ${SOURCES})
 target_include_directories(xtls PUBLIC "include")
 
+if (WIN32)
+    target_compile_definitions(xtls PUBLIC NOMINMAX=1)
+endif()
+
 # Link TLS backends for their impls
 if (XTLS_ENABLE_OPENSSL)
     message(STATUS "xtls: Enabling OpenSSL backend")
