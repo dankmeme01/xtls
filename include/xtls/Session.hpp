@@ -1,6 +1,6 @@
 #pragma once
 #include <xtls/Base.hpp>
-#include <filesystem>
+#include <span>
 
 namespace xtls {
 
