@@ -20,7 +20,7 @@ Backend& Backend::get() {
 #elif defined(XTLS_ENABLE_WOLFSSL)
     return WolfSSLBackend::get();
 #else
-    static_assert(false, "No TLS backend enabled");
+    throw std::runtime_error("No TLS backend enabled");
 #endif
 }
 
