@@ -153,6 +153,7 @@ TlsResult<> OpenSSLContext::loadCACertsBlob(std::string_view pemCerts) {
         }
 
         X509_free(cert);
+        cert = nullptr;
     }
 
     BIO_free(cbio);
