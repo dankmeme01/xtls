@@ -105,11 +105,35 @@ TlsResult<> MbedTLSContext::loadCACerts(const std::filesystem::path& path) {
     int ret = mbedtls_x509_crt_parse_file(&m_ca_chain, p.c_str());
     if (ret < 0) {
         mbedtls_x509_crt_free(&m_ca_chain);
+        m_caInited = false;
         return Err(lastError(ret));
     }
 
     mbedtls_ssl_conf_ca_chain(&m_config, &m_ca_chain, nullptr);
     return Ok();
+}
+
+// mbedtls does not like when the ca blob has other stuff
+static std::vector<std::string> filterPemCerts(std::string_view certs) {
+    std::vector<std::string> result;
+
+    size_t pos = 0;
+    while (true) {
+        auto begin = certs.find("-----BEGIN CERTIFICATE-----", pos);
+        if (begin == std::string_view::npos) {
+            break;
+        }
+        auto end = certs.find("-----END CERTIFICATE-----", begin);
+        if (end == std::string_view::npos) {
+            break;
+        }
+        end += strlen("-----END CERTIFICATE-----");
+
+        result.emplace_back(certs.substr(begin, end - begin));
+
+        pos = end;
+    }
+    return result;
 }
 
 TlsResult<> MbedTLSContext::loadCACertsBlob(std::string_view pemCerts) {
@@ -120,9 +144,25 @@ TlsResult<> MbedTLSContext::loadCACertsBlob(std::string_view pemCerts) {
     m_caInited = true;
     mbedtls_x509_crt_init(&m_ca_chain);
 
-    int ret = mbedtls_x509_crt_parse(&m_ca_chain, reinterpret_cast<const uint8_t*>(pemCerts.data()), pemCerts.size());
-    if (ret < 0) {
+    int ret = 0;
+
+    auto filtered = filterPemCerts(pemCerts);
+    for (const auto& cert : filtered) {
+        if (cert.empty()) {
+            continue;
+        }
+
+        // the +1 here is because for whatever reason the size should include null terminator
+        int r = mbedtls_x509_crt_parse(&m_ca_chain, reinterpret_cast<const uint8_t*>(cert.data()), cert.size() + 1);
+        if (r < 0 && ret == 0) {
+            ret = r;
+        }
+    }
+
+    // only return error if no certs were parsed at all
+    if (ret < 0 && m_ca_chain.next == nullptr) {
         mbedtls_x509_crt_free(&m_ca_chain);
+        m_caInited = false;
         return Err(lastError(ret));
     }
 
