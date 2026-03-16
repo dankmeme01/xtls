@@ -11,7 +11,11 @@ int main() {
     std::println("Using backend {}", backend.description());
 
     auto context = backend.createContext(xtls::ContextType::Client).unwrap();
-    context->loadSystemCACerts().unwrap();
+    if (!context->loadSystemCACerts()) {
+        fmt::println("Failed to load system certs, disabling verification");
+        context->setCertVerification(false).unwrap();
+    }
+
     auto session = context->createSession().unwrap();
 
     int s = socket(AF_INET, SOCK_STREAM, 0);

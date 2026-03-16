@@ -9,6 +9,7 @@ endif()
 project(xtls)
 option(XTLS_ENABLE_OPENSSL "Enable OpenSSL backend implementation" OFF)
 option(XTLS_ENABLE_WOLFSSL "Enable wolfSSL backend implementation" OFF)
+option(XTLS_ENABLE_MBEDTLS "Enable mbedTLS backend implementation" OFF)
 option(XTLS_ENABLE_SOCKET "Enable object oriented socket API" OFF)
 option(XTLS_ENABLE_ARC_SOCKET "Enable async socket API" OFF)
 option(XTLS_BUILD_EXAMPLES "Build examples" OFF)
@@ -47,6 +48,25 @@ if (XTLS_ENABLE_WOLFSSL)
     target_compile_definitions(xtls PUBLIC XTLS_ENABLE_WOLFSSL)
     target_sources(xtls PRIVATE "src/impl/wolfssl.cpp")
     target_link_libraries(xtls PUBLIC wolfssl::wolfssl)
+endif()
+if (XTLS_ENABLE_MBEDTLS)
+    message(STATUS "xtls: Enabling mbedTLS backend")
+    if (NOT TARGET MbedTLS::mbedtls)
+        # include mbedtls as subproject
+        CPMAddPackage(
+            URI "gh:Mbed-TLS/mbedtls@4.0.0"
+            OPTIONS
+                "USE_SHARED_MBEDTLS_LIBRARY OFF"
+                "USE_STATIC_MBEDTLS_LIBRARY ON"
+                "ENABLE_PROGRAMS OFF"
+                "ENABLE_TESTING OFF"
+        )
+    endif()
+
+    target_include_directories(xtls PUBLIC ${MBEDTLS_INCLUDE_DIR})
+    target_compile_definitions(xtls PUBLIC XTLS_ENABLE_MBEDTLS)
+    target_sources(xtls PRIVATE "src/impl/mbedtls.cpp")
+    target_link_libraries(xtls PUBLIC MbedTLS::mbedtls MbedTLS::mbedx509)
 endif()
 
 # Link required dependencies (Result)

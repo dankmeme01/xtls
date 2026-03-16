@@ -259,7 +259,7 @@ TlsResult<std::pair<const uint8_t*, size_t>> WolfSSLSession::getEncryptedData() 
         return Ok(std::make_pair(nullptr, 0));
     }
 
-    return Ok(std::make_pair(reinterpret_cast<const uint8_t*>(m_wbio.data()), static_cast<size_t>(m_wbio.size())));
+    return Ok(std::make_pair(m_wbio.data(), m_wbio.size()));
 }
 
 TlsResult<> WolfSSLSession::notifyEncryptedSent(size_t bytes) {

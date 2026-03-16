@@ -1,6 +1,7 @@
 #include <xtls/xtls.hpp>
 #include <xtls/impl/openssl.hpp>
 #include <xtls/impl/wolfssl.hpp>
+#include <xtls/impl/mbedtls.hpp>
 
 using namespace geode;
 
@@ -19,6 +20,8 @@ Backend& Backend::get() {
     return OpenSSLBackend::get();
 #elif defined(XTLS_ENABLE_WOLFSSL)
     return WolfSSLBackend::get();
+#elif defined(XTLS_ENABLE_MBEDTLS)
+    return MbedTLSBackend::get();
 #else
     throw std::runtime_error("No TLS backend enabled");
 #endif

@@ -12,7 +12,10 @@ Future<xtls::TlsResult<>> asyncMainWr() {
     std::println("Using backend {}", backend.description());
 
     auto context = backend.createContext(xtls::ContextType::Client).unwrap();
-    context->loadSystemCACerts().unwrap();
+    if (!context->loadSystemCACerts()) {
+        fmt::println("Failed to load system certs, disabling verification");
+        context->setCertVerification(false).unwrap();
+    }
 
     std::println("Resolving www.google.com...");
     auto addrs = co_await arc::spawnBlocking<qsox::IpAddress>([] {
