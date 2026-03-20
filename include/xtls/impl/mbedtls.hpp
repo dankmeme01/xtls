@@ -4,8 +4,6 @@
 #include <xtls/Context.hpp>
 #include <xtls/Session.hpp>
 #include <mbedtls/ssl.h>
-#include <mbedtls/entropy.h>
-#include <mbedtls/ctr_drbg.h>
 
 namespace xtls {
 
@@ -26,8 +24,6 @@ public:
 private:
     friend class MbedTLSContext;
     friend class MbedTLSSession;
-    mbedtls_entropy_context m_entropy;
-    mbedtls_ctr_drbg_context m_ctr_drbg;
 
     MbedTLSBackend();
     ~MbedTLSBackend();

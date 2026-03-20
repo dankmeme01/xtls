@@ -27,16 +27,10 @@ MbedTLSBackend& MbedTLSBackend::get() {
 }
 
 MbedTLSBackend::MbedTLSBackend() {
-    mbedtls_entropy_init(&m_entropy);
-    mbedtls_ctr_drbg_init(&m_ctr_drbg);
-    mbedtls_ctr_drbg_seed(&m_ctr_drbg, mbedtls_entropy_func, &m_entropy, nullptr, 0);
-
     psa_crypto_init();
 }
 
 MbedTLSBackend::~MbedTLSBackend() {
-    mbedtls_ctr_drbg_free(&m_ctr_drbg);
-    mbedtls_entropy_free(&m_entropy);
 }
 
 TlsError MbedTLSBackend::lastError(int code) const {
