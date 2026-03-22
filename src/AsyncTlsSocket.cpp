@@ -64,11 +64,32 @@ Future<TlsResult<size_t>> AsyncTlsSocket::send(const void* buf, size_t size) {
         }
 
         // try to flush all data
-        GEODE_CO_UNWRAP(co_await this->tryFlushAll());
+        GEODE_CO_UNWRAP(co_await this->flushAll());
 
         // return number of bytes successfully written
         co_return Ok(result.unwrap());
     }
+}
+
+TlsResult<size_t> AsyncTlsSocket::trySend(const void* buf, size_t size) {
+    // write to the session
+    auto result = m_session->write(buf, size);
+    if (result.isErr()) {
+        return Err(std::move(result).unwrapErr());
+    }
+
+    auto fres = this->tryFlushSync();
+    if (fres.isOk()) {
+        return Ok(result.unwrap());
+    }
+
+    auto err = fres.unwrapErr();
+    if (err == TlsError::WANT_WRITE || err == TlsError::WANT_READ) {
+        // if we would block, still return success since we already wrote to the session
+        return Ok(result.unwrap());
+    }
+
+    return Err(std::move(err));
 }
 
 Future<TlsResult<size_t>> AsyncTlsSocket::receive(void* buf, size_t size) {
@@ -89,7 +110,7 @@ Future<TlsResult<>> AsyncTlsSocket::handleErr(const TlsError& err) {
     while (true) {
         if (err == TlsError::WANT_READ) {
             // always try to flush writes first, this can deadlock otherwise if there's pending data to be sent
-            GEODE_CO_UNWRAP(co_await this->tryFlushAll());
+            GEODE_CO_UNWRAP(co_await this->flushAll());
 
             // wait until the socket is readable, then deliver data into the session
 
@@ -108,7 +129,7 @@ Future<TlsResult<>> AsyncTlsSocket::handleErr(const TlsError& err) {
             GEODE_CO_UNWRAP(m_session->feedEncryptedData(buf, static_cast<size_t>(recvd)));
             break;
         } else if (err == TlsError::WANT_WRITE) {
-            co_return co_await this->tryFlushAll();
+            co_return co_await this->flushAll();
         } else {
             co_return Err(std::move(err));
         }
@@ -117,12 +138,35 @@ Future<TlsResult<>> AsyncTlsSocket::handleErr(const TlsError& err) {
     co_return Ok();
 }
 
-Future<TlsResult<>> AsyncTlsSocket::tryFlushAll() {
-    GEODE_CO_UNWRAP_INTO(auto pair, m_session->getEncryptedData());
+Future<TlsResult<>> AsyncTlsSocket::flushAll() {
+    while (true) {
+        GEODE_CO_UNWRAP_INTO(auto pair, m_session->getEncryptedData());
+        auto [edata, esize] = pair;
+        if (esize == 0) {
+            break;
+        }
+
+        auto res = this->tryFlushSync();
+        if (!res) {
+            auto err = res.unwrapErr();
+            if (err == TlsError::WANT_WRITE) {
+                GEODE_CO_UNWRAP(mapResult(co_await this->pollWritable()));
+                continue;
+            }
+
+            co_return Err(std::move(err));
+        }
+    }
+
+    co_return Ok();
+}
+
+TlsResult<> AsyncTlsSocket::tryFlushSync() {
+    GEODE_UNWRAP_INTO(auto pair, m_session->getEncryptedData());
     auto [edata, esize] = pair;
 
     if (esize == 0) {
-        co_return Ok();
+        return Ok();
     }
 
     size_t sent = 0;
@@ -131,18 +175,22 @@ Future<TlsResult<>> AsyncTlsSocket::tryFlushAll() {
         if (res.isErr()) {
             auto err = res.unwrapErr();
             if (err == qsox::Error::WouldBlock) {
-                // wait until the socket is writable
-                GEODE_CO_UNWRAP(mapResult(co_await this->pollWritable()));
-                continue;
+                break;
             }
-            co_return Err(TlsError::custom(err.message()));
+
+            return Err(TlsError::custom(err.message()));
         }
 
         sent += res.unwrap();
     }
 
-    GEODE_CO_UNWRAP(m_session->notifyEncryptedSent(sent));
-    co_return Ok();
+    GEODE_UNWRAP(m_session->notifyEncryptedSent(sent));
+
+    // if we could not send any data, return an error
+    if (sent == 0) {
+        return Err(TlsError::WANT_WRITE);
+    }
+    return Ok();
 }
 
 }
