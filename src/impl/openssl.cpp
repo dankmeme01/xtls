@@ -124,6 +124,8 @@ TlsResult<> OpenSSLContext::loadCACerts(const std::filesystem::path& path) {
     }
 
     auto p = pathToString(path);
+
+    ERR_clear_error();
     if (0 == SSL_CTX_load_verify_locations(m_ctx, p.c_str(), nullptr)) {
         return Err(lastError());
     }
@@ -132,6 +134,8 @@ TlsResult<> OpenSSLContext::loadCACerts(const std::filesystem::path& path) {
 }
 
 TlsResult<> OpenSSLContext::loadCACertsBlob(std::string_view pemCerts) {
+    ERR_clear_error();
+
     BIO* cbio = BIO_new_mem_buf(pemCerts.data(), static_cast<int>(pemCerts.size()));
     X509* cert = nullptr;
     X509_STORE* store = SSL_CTX_get_cert_store(m_ctx);
@@ -161,6 +165,7 @@ TlsResult<> OpenSSLContext::loadCACertsBlob(std::string_view pemCerts) {
 }
 
 TlsResult<> OpenSSLContext::loadSystemCACerts() {
+    ERR_clear_error();
     if (1 != SSL_CTX_set_default_verify_paths(m_ctx)) {
         return Err(lastError());
     }
@@ -225,6 +230,7 @@ void* OpenSSLSession::getAppData() const {
 }
 
 TlsResult<> OpenSSLSession::doHandshake() {
+    ERR_clear_error();
     int ret = SSL_do_handshake(m_ssl);
     if (ret == 1) {
         return Ok();
@@ -233,6 +239,7 @@ TlsResult<> OpenSSLSession::doHandshake() {
 }
 
 TlsResult<size_t> OpenSSLSession::read(void* buf, size_t size) {
+    ERR_clear_error();
     int ret = SSL_read(m_ssl, buf, static_cast<int>(size));
     if (ret > 0) {
         return Ok(static_cast<size_t>(ret));
@@ -241,6 +248,7 @@ TlsResult<size_t> OpenSSLSession::read(void* buf, size_t size) {
 }
 
 TlsResult<size_t> OpenSSLSession::write(const void* buf, size_t size) {
+    ERR_clear_error();
     int ret = SSL_write(m_ssl, buf, static_cast<int>(size));
     if (ret > 0) {
         return Ok(static_cast<size_t>(ret));
